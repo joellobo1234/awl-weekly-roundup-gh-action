@@ -1,0 +1,236 @@
+build	Set up job	﻿2026-01-14T10:27:06.3059790Z Current runner version: '2.330.0'
+build	Set up job	2026-01-14T10:27:06.3085363Z ##[group]Runner Image Provisioner
+build	Set up job	2026-01-14T10:27:06.3086304Z Hosted Compute Agent
+build	Set up job	2026-01-14T10:27:06.3086944Z Version: 20251211.462
+build	Set up job	2026-01-14T10:27:06.3087553Z Commit: 6cbad8c2bb55d58165063d031ccabf57e2d2db61
+build	Set up job	2026-01-14T10:27:06.3088268Z Build Date: 2025-12-11T16:28:49Z
+build	Set up job	2026-01-14T10:27:06.3088949Z Worker ID: {2387f58a-e420-4bb6-b750-b839c1575527}
+build	Set up job	2026-01-14T10:27:06.3089679Z ##[endgroup]
+build	Set up job	2026-01-14T10:27:06.3090213Z ##[group]Operating System
+build	Set up job	2026-01-14T10:27:06.3091221Z Ubuntu
+build	Set up job	2026-01-14T10:27:06.3091674Z 24.04.3
+build	Set up job	2026-01-14T10:27:06.3092194Z LTS
+build	Set up job	2026-01-14T10:27:06.3092679Z ##[endgroup]
+build	Set up job	2026-01-14T10:27:06.3093177Z ##[group]Runner Image
+build	Set up job	2026-01-14T10:27:06.3093757Z Image: ubuntu-24.04
+build	Set up job	2026-01-14T10:27:06.3094288Z Version: 20260105.202.1
+build	Set up job	2026-01-14T10:27:06.3095266Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260105.202/images/ubuntu/Ubuntu2404-Readme.md
+build	Set up job	2026-01-14T10:27:06.3096672Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260105.202
+build	Set up job	2026-01-14T10:27:06.3097870Z ##[endgroup]
+build	Set up job	2026-01-14T10:27:06.3099045Z ##[group]GITHUB_TOKEN Permissions
+build	Set up job	2026-01-14T10:27:06.3101559Z Contents: read
+build	Set up job	2026-01-14T10:27:06.3102228Z Metadata: read
+build	Set up job	2026-01-14T10:27:06.3102732Z Packages: read
+build	Set up job	2026-01-14T10:27:06.3103236Z ##[endgroup]
+build	Set up job	2026-01-14T10:27:06.3105613Z Secret source: Actions
+build	Set up job	2026-01-14T10:27:06.3106670Z Prepare workflow directory
+build	Set up job	2026-01-14T10:27:06.3442826Z Prepare all required actions
+build	Set up job	2026-01-14T10:27:06.3483186Z Getting action download info
+build	Set up job	2026-01-14T10:27:06.6854643Z Download action repository 'actions/checkout@v3' (SHA:f43a0e5ff2bd294095638e18286ca9a3d1956744)
+build	Set up job	2026-01-14T10:27:06.7875525Z Download action repository 'actions/setup-node@v3' (SHA:3235b876344d2a9aa001b8d1453c930bba69e610)
+build	Set up job	2026-01-14T10:27:07.0383398Z Complete job name: build
+build	Run actions/checkout@v3	﻿2026-01-14T10:27:07.1078165Z ##[group]Run actions/checkout@v3
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1079033Z with:
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1079554Z   repository: joellobo1234/awl-weekly-roundup-gh-action
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1080615Z   token: ***
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1081029Z   ssh-strict: true
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1081453Z   persist-credentials: true
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1081909Z   clean: true
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1082320Z   sparse-checkout-cone-mode: true
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1082809Z   fetch-depth: 1
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1083204Z   fetch-tags: false
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1083603Z   lfs: false
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1083978Z   submodules: false
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1084393Z   set-safe-directory: true
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1085104Z ##[endgroup]
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1969964Z Syncing repository: joellobo1234/awl-weekly-roundup-gh-action
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1973235Z ##[group]Getting Git version info
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1974907Z Working directory is '/home/runner/work/awl-weekly-roundup-gh-action/awl-weekly-roundup-gh-action'
+build	Run actions/checkout@v3	2026-01-14T10:27:07.1977154Z [command]/usr/bin/git version
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2028250Z git version 2.52.0
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2057043Z ##[endgroup]
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2073742Z Temporarily overriding HOME='/home/runner/work/_temp/163368cd-0d0f-4ba6-8b45-7afdec51482a' before making global git config changes
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2076069Z Adding repository directory to the temporary git global config as a safe directory
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2078576Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/awl-weekly-roundup-gh-action/awl-weekly-roundup-gh-action
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2117540Z Deleting the contents of '/home/runner/work/awl-weekly-roundup-gh-action/awl-weekly-roundup-gh-action'
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2121169Z ##[group]Initializing the repository
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2125701Z [command]/usr/bin/git init /home/runner/work/awl-weekly-roundup-gh-action/awl-weekly-roundup-gh-action
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2221455Z hint: Using 'master' as the name for the initial branch. This default branch name
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2222961Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2224193Z hint: to use in all of your new repositories, which will suppress this warning,
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2225576Z hint: call:
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2226105Z hint:
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2226961Z hint: 	git config --global init.defaultBranch <name>
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2228326Z hint:
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2229333Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2231229Z hint: 'development'. The just-created branch can be renamed via this command:
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2232557Z hint:
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2233241Z hint: 	git branch -m <name>
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2233975Z hint:
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2234961Z hint: Disable this message with "git config set advice.defaultBranchName false"
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2237095Z Initialized empty Git repository in /home/runner/work/awl-weekly-roundup-gh-action/awl-weekly-roundup-gh-action/.git/
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2240697Z [command]/usr/bin/git remote add origin https://github.com/joellobo1234/awl-weekly-roundup-gh-action
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2271732Z ##[endgroup]
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2272953Z ##[group]Disabling automatic garbage collection
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2274998Z [command]/usr/bin/git config --local gc.auto 0
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2302398Z ##[endgroup]
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2303619Z ##[group]Setting up auth
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2308607Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2336749Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2664018Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2690652Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2923795Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2956517Z ##[endgroup]
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2957387Z ##[group]Fetching the repository
+build	Run actions/checkout@v3	2026-01-14T10:27:07.2965315Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +1abb940f062f5b47be4c0dcd7cd729308da89b24:refs/remotes/origin/master
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4927182Z remote: Enumerating objects: 10, done.        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4928202Z remote: Counting objects:  10% (1/10)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4929251Z remote: Counting objects:  20% (2/10)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4930051Z remote: Counting objects:  30% (3/10)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4930881Z remote: Counting objects:  40% (4/10)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4931469Z remote: Counting objects:  50% (5/10)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4932041Z remote: Counting objects:  60% (6/10)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4932637Z remote: Counting objects:  70% (7/10)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4933189Z remote: Counting objects:  80% (8/10)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4933768Z remote: Counting objects:  90% (9/10)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4934340Z remote: Counting objects: 100% (10/10)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4934949Z remote: Counting objects: 100% (10/10), done.        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4935614Z remote: Compressing objects:  12% (1/8)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4936207Z remote: Compressing objects:  25% (2/8)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4936785Z remote: Compressing objects:  37% (3/8)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4937364Z remote: Compressing objects:  50% (4/8)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4937957Z remote: Compressing objects:  62% (5/8)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4938530Z remote: Compressing objects:  75% (6/8)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4939113Z remote: Compressing objects:  87% (7/8)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4939705Z remote: Compressing objects: 100% (8/8)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4940318Z remote: Compressing objects: 100% (8/8), done.        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.4947858Z remote: Total 10 (delta 0), reused 6 (delta 0), pack-reused 0 (from 0)        
+build	Run actions/checkout@v3	2026-01-14T10:27:07.5023415Z From https://github.com/joellobo1234/awl-weekly-roundup-gh-action
+build	Run actions/checkout@v3	2026-01-14T10:27:07.5024599Z  * [new ref]         1abb940f062f5b47be4c0dcd7cd729308da89b24 -> origin/master
+build	Run actions/checkout@v3	2026-01-14T10:27:07.5056337Z ##[endgroup]
+build	Run actions/checkout@v3	2026-01-14T10:27:07.5057099Z ##[group]Determining the checkout info
+build	Run actions/checkout@v3	2026-01-14T10:27:07.5058779Z ##[endgroup]
+build	Run actions/checkout@v3	2026-01-14T10:27:07.5059683Z ##[group]Checking out the ref
+build	Run actions/checkout@v3	2026-01-14T10:27:07.5063152Z [command]/usr/bin/git checkout --progress --force -B master refs/remotes/origin/master
+build	Run actions/checkout@v3	2026-01-14T10:27:07.5112606Z Reset branch 'master'
+build	Run actions/checkout@v3	2026-01-14T10:27:07.5115676Z branch 'master' set up to track 'origin/master'.
+build	Run actions/checkout@v3	2026-01-14T10:27:07.5121711Z ##[endgroup]
+build	Run actions/checkout@v3	2026-01-14T10:27:07.5153229Z [command]/usr/bin/git log -1 --format='%H'
+build	Run actions/checkout@v3	2026-01-14T10:27:07.5173889Z '1abb940f062f5b47be4c0dcd7cd729308da89b24'
+build	Setup Node.js	﻿2026-01-14T10:27:07.5408926Z ##[group]Run actions/setup-node@v3
+build	Setup Node.js	2026-01-14T10:27:07.5409475Z with:
+build	Setup Node.js	2026-01-14T10:27:07.5409842Z   node-version: 20
+build	Setup Node.js	2026-01-14T10:27:07.5410254Z   always-auth: false
+build	Setup Node.js	2026-01-14T10:27:07.5411026Z   check-latest: false
+build	Setup Node.js	2026-01-14T10:27:07.5411590Z   token: ***
+build	Setup Node.js	2026-01-14T10:27:07.5411969Z ##[endgroup]
+build	Setup Node.js	2026-01-14T10:27:07.7384850Z Found in cache @ /opt/hostedtoolcache/node/20.19.6/x64
+build	Setup Node.js	2026-01-14T10:27:07.7395300Z ##[group]Environment details
+build	Setup Node.js	2026-01-14T10:27:08.0517443Z node: v20.19.6
+build	Setup Node.js	2026-01-14T10:27:08.0518848Z npm: 10.8.2
+build	Setup Node.js	2026-01-14T10:27:08.0519765Z yarn: 1.22.22
+build	Setup Node.js	2026-01-14T10:27:08.0522285Z ##[endgroup]
+build	Install Dependencies	﻿2026-01-14T10:27:08.0664919Z ##[group]Run npm ci
+build	Install Dependencies	2026-01-14T10:27:08.0666123Z [36;1mnpm ci[0m
+build	Install Dependencies	2026-01-14T10:27:08.0711539Z shell: /usr/bin/bash -e {0}
+build	Install Dependencies	2026-01-14T10:27:08.0712780Z ##[endgroup]
+build	Install Dependencies	2026-01-14T10:27:10.0720886Z 
+build	Install Dependencies	2026-01-14T10:27:10.0728984Z added 12 packages, and audited 13 packages in 2s
+build	Install Dependencies	2026-01-14T10:27:10.0730871Z 
+build	Install Dependencies	2026-01-14T10:27:10.0731254Z 1 package is looking for funding
+build	Install Dependencies	2026-01-14T10:27:10.0731835Z   run `npm fund` for details
+build	Install Dependencies	2026-01-14T10:27:10.0732173Z 
+build	Install Dependencies	2026-01-14T10:27:10.0732424Z found 0 vulnerabilities
+build	Generate Newsletter	﻿2026-01-14T10:27:10.0924506Z ##[group]Run node index.js
+build	Generate Newsletter	2026-01-14T10:27:10.0924906Z [36;1mnode index.js[0m
+build	Generate Newsletter	2026-01-14T10:27:10.0959521Z shell: /usr/bin/bash -e {0}
+build	Generate Newsletter	2026-01-14T10:27:10.0959831Z env:
+build	Generate Newsletter	2026-01-14T10:27:10.0960538Z   GITHUB_TOKEN: ***
+build	Generate Newsletter	2026-01-14T10:27:10.0960961Z   GEMINI_API_KEY: ***
+build	Generate Newsletter	2026-01-14T10:27:10.0961224Z   DATE_OVERRIDE: 2026-01-10
+build	Generate Newsletter	2026-01-14T10:27:10.0961492Z   DRY_RUN: false
+build	Generate Newsletter	2026-01-14T10:27:10.0961726Z ##[endgroup]
+build	Generate Newsletter	2026-01-14T10:27:10.2175603Z Generating roundup for Week in AWL | 3 January 2026 - 9 January 2026...
+build	Generate Newsletter	2026-01-14T10:27:10.8595796Z Found 7 Unique PRs and 0 Unique Issues.
+build	Generate Newsletter	2026-01-14T10:27:13.1061286Z ---------------------------------------------------
+build	Generate Newsletter	2026-01-14T10:27:13.1062241Z DRY RUN MODE ENABLED. Generated Body:
+build	Generate Newsletter	2026-01-14T10:27:13.1071476Z ---------------------------------------------------
+build	Generate Newsletter	2026-01-14T10:27:13.1072658Z Here is the **Week in AWL | 3 January 2026 - 9 January 2026**! 🚀
+build	Generate Newsletter	2026-01-14T10:27:13.1073156Z 
+build	Generate Newsletter	2026-01-14T10:27:13.1075051Z Highlights include a smoother Agent Studio UI and the exciting addition of slash commands, making the Agentic Web Learning Tool even more user-friendly and efficient! Plus, we've squashed some bugs and made things prettier behind the scenes.
+build	Generate Newsletter	2026-01-14T10:27:13.1076758Z 
+build	Generate Newsletter	2026-01-14T10:27:13.1076928Z ### PR Status
+build	Generate Newsletter	2026-01-14T10:27:13.1077229Z <details>
+build	Generate Newsletter	2026-01-14T10:27:13.1078356Z <summary>✅ <strong>Fix: Agent studio UI</strong> (Merged on Jan 6 by [@amovar18](https://github.com/amovar18))</summary>
+build	Generate Newsletter	2026-01-14T10:27:13.1078938Z <br>
+build	Generate Newsletter	2026-01-14T10:27:13.1079487Z This PR refactors the extension's configuration model to be provider-centric instead of agent-centric.
+build	Generate Newsletter	2026-01-14T10:27:13.1079994Z <br><br>
+build	Generate Newsletter	2026-01-14T10:27:13.1080784Z <a href="https://github.com/amedina/agentic-web-learning-tool/pull/22">View Pull Request</a>
+build	Generate Newsletter	2026-01-14T10:27:13.1081314Z </details>
+build	Generate Newsletter	2026-01-14T10:27:13.1081434Z 
+build	Generate Newsletter	2026-01-14T10:27:13.1081525Z <details>
+build	Generate Newsletter	2026-01-14T10:27:13.1082290Z <summary>✅ <strong>Feature: Add slash commands</strong> (Merged on Jan 7 by [@mohdsayed](https://github.com/mohdsayed))</summary>
+build	Generate Newsletter	2026-01-14T10:27:13.1083308Z <br>
+build	Generate Newsletter	2026-01-14T10:27:13.1083976Z This PR introduces a prompt commands system, allowing users to define reusable slash commands that expand into prompt templates.
+build	Generate Newsletter	2026-01-14T10:27:13.1084571Z <br><br>
+build	Generate Newsletter	2026-01-14T10:27:13.1085067Z <a href="https://github.com/amedina/agentic-web-learning-tool/pull/27">View Pull Request</a>
+build	Generate Newsletter	2026-01-14T10:27:13.1085531Z </details>
+build	Generate Newsletter	2026-01-14T10:27:13.1085643Z 
+build	Generate Newsletter	2026-01-14T10:27:13.1085723Z <details>
+build	Generate Newsletter	2026-01-14T10:27:13.1086510Z <summary>✅ <strong>WebMCP tools dark mode & layout fixes</strong> (Merged on Jan 7 by [@mohdsayed](https://github.com/mohdsayed))</summary>
+build	Generate Newsletter	2026-01-14T10:27:13.1087103Z <br>
+build	Generate Newsletter	2026-01-14T10:27:13.1087550Z This PR implements dark mode support for the WebMCP Tools editor and fixes layout issues.
+build	Generate Newsletter	2026-01-14T10:27:13.1088017Z <br><br>
+build	Generate Newsletter	2026-01-14T10:27:13.1088551Z <a href="https://github.com/amedina/agentic-web-learning-tool/pull/28">View Pull Request</a>
+build	Generate Newsletter	2026-01-14T10:27:13.1088997Z </details>
+build	Generate Newsletter	2026-01-14T10:27:13.1089109Z 
+build	Generate Newsletter	2026-01-14T10:27:13.1089186Z <details>
+build	Generate Newsletter	2026-01-14T10:27:13.1089890Z <summary>✅ <strong>Chore: Prettier Formatting</strong> (Merged on Jan 8 by [@amovar18](https://github.com/amovar18))</summary>
+build	Generate Newsletter	2026-01-14T10:27:13.1090574Z <br>
+build	Generate Newsletter	2026-01-14T10:27:13.1090886Z This PR applies Prettier formatting to the entire codebase.
+build	Generate Newsletter	2026-01-14T10:27:13.1091200Z <br><br>
+build	Generate Newsletter	2026-01-14T10:27:13.1091648Z <a href="https://github.com/amedina/agentic-web-learning-tool/pull/32">View Pull Request</a>
+build	Generate Newsletter	2026-01-14T10:27:13.1092073Z </details>
+build	Generate Newsletter	2026-01-14T10:27:13.1092177Z 
+build	Generate Newsletter	2026-01-14T10:27:13.1092253Z <details>
+build	Generate Newsletter	2026-01-14T10:27:13.1092888Z <summary>✅ <strong>Chore: Add lint-staged</strong> (Merged on Jan 8 by [@amovar18](https://github.com/amovar18))</summary>
+build	Generate Newsletter	2026-01-14T10:27:13.1093382Z <br>
+build	Generate Newsletter	2026-01-14T10:27:13.1093867Z This PR adds lint-staged to lint only the staged files.
+build	Generate Newsletter	2026-01-14T10:27:13.1095280Z <br><br>
+build	Generate Newsletter	2026-01-14T10:27:13.1095784Z <a href="https://github.com/amedina/agentic-web-learning-tool/pull/33">View Pull Request</a>
+build	Generate Newsletter	2026-01-14T10:27:13.1096518Z </details>
+build	Generate Newsletter	2026-01-14T10:27:13.1096625Z 
+build	Generate Newsletter	2026-01-14T10:27:13.1096710Z <details>
+build	Generate Newsletter	2026-01-14T10:27:13.1097575Z <summary>✅ <strong>Fix: Allowed domain issue for WebMCP tool registration</strong> (Merged on Jan 8 by [@mohdsayed](https://github.com/mohdsayed))</summary>
+build	Generate Newsletter	2026-01-14T10:27:13.1098201Z <br>
+build	Generate Newsletter	2026-01-14T10:27:13.1098541Z This PR fixes an allowed domain issue for WebMCP tool registration.
+build	Generate Newsletter	2026-01-14T10:27:13.1098881Z <br><br>
+build	Generate Newsletter	2026-01-14T10:27:13.1099328Z <a href="https://github.com/amedina/agentic-web-learning-tool/pull/34">View Pull Request</a>
+build	Generate Newsletter	2026-01-14T10:27:13.1099758Z </details>
+build	Generate Newsletter	2026-01-14T10:27:13.1099856Z 
+build	Generate Newsletter	2026-01-14T10:27:13.1101433Z - 🚧 [Feature: Add Inbuilt extension tools for browser manipulation.](https://github.com/amedina/agentic-web-learning-tool/pull/29) ([Opened on Jan 7](https://github.com/amedina/agentic-web-learning-tool/pull/29) by [@amovar18](https://github.com/amovar18))
+build	Generate Newsletter	2026-01-14T10:27:13.1102397Z 
+build	Generate Newsletter	2026-01-14T10:27:13.1102515Z ### Issues Status
+build	Generate Newsletter	2026-01-14T10:27:13.1102751Z *No new activity this week*
+build	Generate Newsletter	2026-01-14T10:27:13.1102907Z 
+build	Generate Newsletter	2026-01-14T10:27:13.1103044Z ### 🌟 Contributors
+build	Generate Newsletter	2026-01-14T10:27:13.1103841Z Thanks to everyone who engaged this week: [amovar18](https://github.com/amovar18), [mayan-000](https://github.com/mayan-000), [mohdsayed](https://github.com/mohdsayed)
+build	Generate Newsletter	2026-01-14T10:27:13.1104437Z 
+build	Generate Newsletter	2026-01-14T10:27:13.1104448Z 
+build	Generate Newsletter	2026-01-14T10:27:13.1104519Z ---
+build	Generate Newsletter	2026-01-14T10:27:13.1104805Z *Auto-generated by Week in AWL Action*
+build	Generate Newsletter	2026-01-14T10:27:13.1105162Z ---------------------------------------------------
+build	Post Setup Node.js	﻿2026-01-14T10:27:13.1231102Z Post job cleanup.
+build	Post Run actions/checkout@v3	﻿2026-01-14T10:27:13.2854065Z Post job cleanup.
+build	Post Run actions/checkout@v3	2026-01-14T10:27:13.3566848Z [command]/usr/bin/git version
+build	Post Run actions/checkout@v3	2026-01-14T10:27:13.3601290Z git version 2.52.0
+build	Post Run actions/checkout@v3	2026-01-14T10:27:13.3645736Z Temporarily overriding HOME='/home/runner/work/_temp/33543af8-e585-4995-adaa-d36819b0833d' before making global git config changes
+build	Post Run actions/checkout@v3	2026-01-14T10:27:13.3647369Z Adding repository directory to the temporary git global config as a safe directory
+build	Post Run actions/checkout@v3	2026-01-14T10:27:13.3650704Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/awl-weekly-roundup-gh-action/awl-weekly-roundup-gh-action
+build	Post Run actions/checkout@v3	2026-01-14T10:27:13.3682565Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+build	Post Run actions/checkout@v3	2026-01-14T10:27:13.3713871Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+build	Post Run actions/checkout@v3	2026-01-14T10:27:13.3943286Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build	Post Run actions/checkout@v3	2026-01-14T10:27:13.3963979Z http.https://github.com/.extraheader
+build	Post Run actions/checkout@v3	2026-01-14T10:27:13.3976281Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+build	Post Run actions/checkout@v3	2026-01-14T10:27:13.4007343Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+build	Complete job	﻿2026-01-14T10:27:13.4336183Z Cleaning up orphan processes

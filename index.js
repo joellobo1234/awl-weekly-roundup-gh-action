@@ -29,7 +29,8 @@ async function main() {
 
     console.log(`Generating roundup for ${reportTitle}...`);
 
-    const repoQuery = "repo:amedina/agentic-web-learning-tool";
+    const targetRepoName = process.env.SOURCE_REPO || "amedina/agentic-web-learning-tool";
+    const repoQuery = `repo:${targetRepoName}`;
 
     // We want to capture ALL activity
     const prsBodyQuery = `${repoQuery} is:pr updated:${formattedStart}..${formattedEnd}`;
@@ -60,6 +61,7 @@ async function main() {
                 __typename
                 number
                 title
+                body
                 url
                 state
                 createdAt
@@ -134,7 +136,6 @@ async function main() {
     };
 
     // Sort by Title Prefix Priority: Feature > Feat > Fix > Chore > Others
-    // And within same prefix, use getPriority (Merged/Open) or Date
     const getPrefixPriority = (title) => {
         const t = title.toLowerCase();
         if (t.startsWith("feature")) return 1;
@@ -145,17 +146,14 @@ async function main() {
     };
 
     const sortItems = (a, b) => {
-        // First sort by Title Prefix
         const pPA = getPrefixPriority(a.title);
         const pPB = getPrefixPriority(b.title);
         if (pPA !== pPB) return pPA - pPB;
 
-        // Then by Status Priority (Merged > Created > etc)
         const pSA = getPriority(a);
         const pSB = getPriority(b);
         if (pSA !== pSB) return pSA - pSB;
 
-        // Finally by number
         return a.number - b.number;
     };
 
@@ -172,17 +170,16 @@ async function main() {
     // Formatting Helpers
     const formatDate = (d) => format(new Date(d), "MMM d");
 
-    const formatBullet = (item) => {
+    const renderAccordion = (item, type = 'pr') => {
+        const mergedInWeek = item.mergedAt && item.mergedAt >= formattedStart && item.mergedAt <= formattedEnd;
+        const closedInWeek = item.closedAt && item.closedAt >= formattedStart && item.closedAt <= formattedEnd;
         const createdInWeek = item.createdAt >= formattedStart && item.createdAt <= formattedEnd;
 
         let icon = "⚪";
         let statusText = "Active";
         let date = "";
 
-        if (item.__typename === 'PullRequest') {
-            const mergedInWeek = item.mergedAt && item.mergedAt >= formattedStart && item.mergedAt <= formattedEnd;
-            const closedInWeek = item.closedAt && item.closedAt >= formattedStart && item.closedAt <= formattedEnd;
-
+        if (type === 'pr') {
             if (mergedInWeek) {
                 icon = "✅";
                 statusText = "Merged on";
@@ -197,34 +194,42 @@ async function main() {
                 date = item.createdAt;
             } else {
                 icon = "⚡";
-                statusText = "Active";
+                statusText = "Updated on";
                 date = item.updatedAt;
             }
         } else {
-            const closedInWeek = item.closedAt && item.closedAt >= formattedStart && item.closedAt <= formattedEnd;
-
+            // Issue Logic
             if (closedInWeek) {
                 icon = "✅";
                 statusText = "Closed on";
                 date = item.closedAt;
             } else if (createdInWeek) {
-                icon = "🚧";
+                icon = "✨";
                 statusText = "Opened on";
                 date = item.createdAt;
             } else {
                 icon = "⚡";
-                statusText = "Active";
+                statusText = "Updated on";
                 date = item.updatedAt;
             }
         }
 
-        const linkedStatus = date ? `[${statusText} ${formatDate(date)}](${item.url})` : `[${statusText}](${item.url})`;
-        const authorLink = item.author ? `[@${item.author.login}](${item.author.url})` : "unknown";
+        const formattedDateStr = formatDate(date);
+        const authorLink = item.author ? `<a href="${item.author.url}">@${item.author.login}</a>` : "unknown";
+        const summary = item.aiSummary || (item.body ? item.body.replace(/\n/g, ' ').substring(0, 150) + "..." : "No description provided.");
 
-        return `- ${icon} [${item.title}](${item.url}) (${linkedStatus} by ${authorLink})`;
+        const linkText = type === 'pr' ? "📥 View Pull Request" : "🐛 View Issue";
+
+        return `<details>
+<summary>${icon} <strong>${item.title}</strong> (${statusText} ${formattedDateStr} by ${authorLink})</summary>
+<br>
+${summary}
+<br><br>
+<a href="${item.url}">${linkText}</a>
+</details>`;
     };
 
-    // Conversational Summary using Gemini
+    // Conversational Summary using Gemini (Global)
     const generateSummary = async (prsNodes) => {
         if (prsNodes.length === 0) return "This week saw steady progress with various improvements.";
 
@@ -283,7 +288,7 @@ async function main() {
 
     body += `### PR Status\n`;
 
-    // Filter relevant PRs for the week
+    // Filter relevant PRs for the week for AI Summaries
     const relevantPRs = prs.filter(pr => {
         const mergedInWeek = pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd;
         const closedInWeek = pr.closedAt && pr.closedAt >= formattedStart && pr.closedAt <= formattedEnd;
@@ -334,45 +339,7 @@ async function main() {
     }
 
     if (relevantPRs.length > 0) {
-        body += relevantPRs.map(pr => {
-            const mergedInWeek = pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd;
-            const closedInWeek = pr.closedAt && pr.closedAt >= formattedStart && pr.closedAt <= formattedEnd;
-            const createdInWeek = pr.createdAt >= formattedStart && pr.createdAt <= formattedEnd;
-
-            let icon = "⚪";
-            let statusText = "Active";
-            let date = "";
-
-            if (mergedInWeek) {
-                icon = "✅";
-                statusText = "Merged on";
-                date = pr.mergedAt;
-            } else if (closedInWeek) {
-                icon = "🔴";
-                statusText = "Closed on";
-                date = pr.closedAt;
-            } else if (createdInWeek) {
-                icon = "🚧";
-                statusText = "Opened on";
-                date = pr.createdAt;
-            } else {
-                icon = "⚡";
-                statusText = "Updated on";
-                date = pr.updatedAt;
-            }
-
-            const formattedDateStr = formatDate(date);
-            const authorLink = pr.author ? `<a href="${pr.author.url}">@${pr.author.login}</a>` : "unknown";
-            const summary = pr.aiSummary || (pr.body ? pr.body.substring(0, 100) + "..." : "No description provided.");
-
-            return `<details>
-<summary>${icon} <strong>${pr.title}</strong> (${statusText} ${formattedDateStr} by ${authorLink})</summary>
-<br>
-${summary}
-<br><br>
-<a href="${pr.url}">📥 View Pull Request</a>
-</details>`;
-        }).join('\n\n');
+        body += relevantPRs.map(pr => renderAccordion(pr, 'pr')).join('\n\n');
     } else {
         body += `*No new activity this week*`;
     }
@@ -380,7 +347,7 @@ ${summary}
 
     body += `### Issues Status\n`;
     if (issues.length > 0) {
-        body += issues.map(formatBullet).join('\n');
+        body += issues.map(issue => renderAccordion(issue, 'issue')).join('\n\n');
     } else {
         body += `*No new issues in this week*`;
     }
@@ -413,7 +380,7 @@ ${summary}
         body += `### 🌟 Contributors\nThanks to everyone who engaged this week: ${finalContribLinks.join(', ')}\n\n`;
     }
 
-    body += `\n---\n*Auto-generated by Week in AWL GitHub Action, summarised using Gemini 2.0 Flash*`;
+    body += `\n---\n*Auto-generated by Week in AWL GitHub Action, summarised using Gemini 2.0 Flash.*\n\n*Disclaimer: The summaries in this post are generated by AI and may contain inaccuracies. Please verify important details by reviewing the source Pull Requests/Issues directly.*`;
 
     if (process.env.DRY_RUN === 'true') {
         console.log("---------------------------------------------------");
