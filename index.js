@@ -258,32 +258,38 @@ async function main() {
     // Build Body
     let body = `Here is the **${reportTitle}**! 🚀\n\n`;
 
-    // Generate Global Summary (using existing function, but modified to just return the text if we want, or keep as is)
-    // Actually, let's keep the global summary at the top, and THEN do the per-PR summaries.
     if (prs.length > 0) {
         body += `${await generateSummary(prs)}\n\n`;
     }
 
     body += `### PR Status\n`;
 
-    // Separate Merged PRs for detailed summarization
-    const mergedPRs = prs.filter(pr => pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd);
-    const otherPRs = prs.filter(pr => !(pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd));
+    // Filter relevant PRs for the week
+    const relevantPRs = prs.filter(pr => {
+        const mergedInWeek = pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd;
+        const closedInWeek = pr.closedAt && pr.closedAt >= formattedStart && pr.closedAt <= formattedEnd;
+        const createdInWeek = pr.createdAt >= formattedStart && pr.createdAt <= formattedEnd;
+        return mergedInWeek || closedInWeek || createdInWeek;
+    });
 
-    if (mergedPRs.length > 0 && process.env.GEMINI_API_KEY) {
+    if (relevantPRs.length > 0 && process.env.GEMINI_API_KEY) {
         try {
             const { GoogleGenerativeAI } = require("@google/generative-ai");
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
             const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-            const prData = mergedPRs.map((pr, index) => `PR #${index}: Title: "${pr.title}", Body: "${(pr.body || '').replace(/\n/g, ' ').substring(0, 200)}..."`).join('\n');
+            // Batch process matched PRs
+            const prData = relevantPRs.map((pr, index) => `PR #${index}: Title: "${pr.title}", State: ${pr.state}, Body: "${(pr.body || '').replace(/\n/g, ' ').substring(0, 300)}..."`).join('\n');
 
             const prompt = `
-            You are analyzing Pull Requests for a changelog.
-            Here are the merged PRs:
+            You are analyzing Pull Requests for a technical newsletter.
+            Here is the list of PRs:
             ${prData}
 
-            For each PR, write a 1-sentence summary of the functionality merged.
+            For each PR, write a clear, elaborate summary (2-3 sentences).
+            - For MERGED PRs: Explain exactly what functionality was added or fixed and why it matters to the team.
+            - For OPEN/WIP PRs: Explain what this feature *will* add or solve when completed.
+            
             Return valid JSON format: { "summaries": [ { "index": 0, "summary": "..." }, ... ] }
             Do not include markdown formatting in the JSON.
             `;
@@ -298,7 +304,7 @@ async function main() {
             const summaries = JSON.parse(jsonString).summaries;
 
             // Map summaries back to PRs
-            mergedPRs.forEach((pr, i) => {
+            relevantPRs.forEach((pr, i) => {
                 const summaryObj = summaries.find(s => s.index === i);
                 pr.aiSummary = summaryObj ? summaryObj.summary : "No summary available.";
             });
@@ -308,28 +314,47 @@ async function main() {
         }
     }
 
-    // Render Merged PRs with Collapsible Sections
-    if (mergedPRs.length > 0) {
-        body += mergedPRs.map(pr => {
-            const statusText = `Merged on ${formatDate(pr.mergedAt)}`;
+    if (relevantPRs.length > 0) {
+        body += relevantPRs.map(pr => {
+            const mergedInWeek = pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd;
+            const closedInWeek = pr.closedAt && pr.closedAt >= formattedStart && pr.closedAt <= formattedEnd;
+            const createdInWeek = pr.createdAt >= formattedStart && pr.createdAt <= formattedEnd;
+
+            let icon = "⚪";
+            let statusText = "Active";
+            let date = "";
+
+            if (mergedInWeek) {
+                icon = "✅";
+                statusText = "Merged on";
+                date = pr.mergedAt;
+            } else if (closedInWeek) {
+                icon = "🔴";
+                statusText = "Closed on";
+                date = pr.closedAt;
+            } else if (createdInWeek) {
+                icon = "🚧";
+                statusText = "Opened on";
+                date = pr.createdAt;
+            } else {
+                icon = "⚡";
+                statusText = "Updated on";
+                date = pr.updatedAt;
+            }
+
+            const formattedDateStr = formatDate(date);
             const authorLink = pr.author ? `[@${pr.author.login}](${pr.author.url})` : "unknown";
             const summary = pr.aiSummary || (pr.body ? pr.body.substring(0, 100) + "..." : "No description provided.");
 
             return `<details>
-<summary>✅ <strong>${pr.title}</strong> (${statusText} by ${authorLink})</summary>
+<summary>${icon} <strong>${pr.title}</strong> (${statusText} ${formattedDateStr} by ${authorLink})</summary>
 <br>
 ${summary}
 <br><br>
 <a href="${pr.url}">View Pull Request</a>
 </details>`;
         }).join('\n\n');
-        body += '\n\n';
-    }
-
-    // Render Other PRs (Open/Closed but not merged) normally
-    if (otherPRs.length > 0) {
-        body += otherPRs.map(formatBullet).join('\n');
-    } else if (mergedPRs.length === 0) {
+    } else {
         body += `*No new activity this week*`;
     }
     body += `\n\n`;
@@ -342,10 +367,33 @@ ${summary}
     }
     body += `\n\n`;
 
-    if (contributors.size > 0) {
-        const sortedContributors = Array.from(contributors.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-        const links = sortedContributors.map(([name, url]) => `[${name}](${url})`);
-        body += `### 🌟 Contributors\nThanks to everyone who engaged this week: ${links.join(', ')}\n\n`;
+    // Contributors
+    const coreTeam = [
+        "amedina", "gagan0123", "amovar18", "mayan-000", "mohdsayed", "maitreyie-chavan", "joellobo1234"
+    ];
+
+    // 1. Core Team (if in contributors map)
+    const finalContribOrder = [];
+    coreTeam.forEach(login => {
+        if (contributors.has(login)) {
+            finalContribOrder.push(login);
+        }
+    });
+
+    // 2. Others (sorted alphabetically)
+    const others = Array.from(contributors.keys())
+        .filter(c => !coreTeam.includes(c))
+        .sort();
+
+    finalContribOrder.push(...others);
+
+    const finalContribLinks = finalContribOrder.map(login => {
+        const url = contributors.get(login);
+        return `[${login}](${url})`;
+    });
+
+    if (finalContribLinks.length > 0) {
+        body += `### 🌟 Contributors\nThanks to everyone who engaged this week: ${finalContribLinks.join(', ')}\n\n`;
     }
 
     body += `\n---\n*Auto-generated by Week in AWL Action*`;
