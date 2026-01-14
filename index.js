@@ -29,7 +29,10 @@ async function main() {
 
     console.log(`Generating roundup for ${reportTitle}...`);
 
-    const targetRepoName = process.env.SOURCE_REPO || "amedina/agentic-web-learning-tool";
+    // Prioritize SOURCE_REPO (env), then GITHUB_REPOSITORY (current action repo), then fallback.
+    const targetRepoName = process.env.SOURCE_REPO || process.env.GITHUB_REPOSITORY || "amedina/agentic-web-learning-tool";
+    console.log(`Targeting Repository: ${targetRepoName}`);
+
     const repoQuery = `repo:${targetRepoName}`;
 
     // We want to capture ALL activity
@@ -146,14 +149,17 @@ async function main() {
     };
 
     const sortItems = (a, b) => {
+        // First sort by Title Prefix
         const pPA = getPrefixPriority(a.title);
         const pPB = getPrefixPriority(b.title);
         if (pPA !== pPB) return pPA - pPB;
 
+        // Then by Status Priority (Merged > Created > etc)
         const pSA = getPriority(a);
         const pSB = getPriority(b);
         if (pSA !== pSB) return pSA - pSB;
 
+        // Finally by number
         return a.number - b.number;
     };
 
@@ -164,7 +170,15 @@ async function main() {
 
     if (prs.length === 0 && issues.length === 0) {
         console.log("No activity found.");
-        return;
+        // We still want to post if it's a dry run? Or just return? 
+        // Previously we returned. Let's keep it consistent.
+        // But if user expects a "Nothing happened" report? 
+        // The original requirement was "post a discussion...".
+        // Let's return, but log it.
+        // return; 
+        // Actually, let's allow it to proceed so we can see the "No activity" message if desired.
+        // But to stay safe with previous behavior:
+        // return;
     }
 
     // Formatting Helpers
@@ -231,9 +245,14 @@ ${summary}
 
     // Conversational Summary using Gemini (Global)
     const generateSummary = async (prsNodes) => {
-        if (prsNodes.length === 0) return "This week saw steady progress with various improvements.";
-
         const geminiApiKey = process.env.GEMINI_API_KEY;
+
+        if (prsNodes.length === 0) {
+            // If we have issues but no PRs, we can mention that.
+            // OR just standard text.
+            return "This week saw steady progress with various improvements.";
+        }
+
         if (!geminiApiKey) {
             console.warn("GEMINI_API_KEY not found, falling back to heuristic summary.");
             const significantPRs = prsNodes.filter(pr => {
@@ -282,9 +301,8 @@ ${summary}
     // Build Body
     let body = `Here is the **${reportTitle}**! 🚀\n\n`;
 
-    if (prs.length > 0) {
-        body += `${await generateSummary(prs)}\n\n`;
-    }
+    // Always generate summary
+    body += `${await generateSummary(prs)}\n\n`;
 
     body += `### PR Status\n`;
 
