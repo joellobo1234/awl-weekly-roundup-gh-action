@@ -133,10 +133,29 @@ async function main() {
         }
     };
 
+    // Sort by Title Prefix Priority: Feature > Feat > Fix > Chore > Others
+    // And within same prefix, use getPriority (Merged/Open) or Date
+    const getPrefixPriority = (title) => {
+        const t = title.toLowerCase();
+        if (t.startsWith("feature")) return 1;
+        if (t.startsWith("feat")) return 2;
+        if (t.startsWith("fix")) return 3;
+        if (t.startsWith("chore")) return 4;
+        return 5;
+    };
+
     const sortItems = (a, b) => {
-        const pA = getPriority(a);
-        const pB = getPriority(b);
-        if (pA !== pB) return pA - pB;
+        // First sort by Title Prefix
+        const pPA = getPrefixPriority(a.title);
+        const pPB = getPrefixPriority(b.title);
+        if (pPA !== pPB) return pPA - pPB;
+
+        // Then by Status Priority (Merged > Created > etc)
+        const pSA = getPriority(a);
+        const pSB = getPriority(b);
+        if (pSA !== pSB) return pSA - pSB;
+
+        // Finally by number
         return a.number - b.number;
     };
 
