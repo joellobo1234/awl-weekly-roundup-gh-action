@@ -1,0 +1,13 @@
+{
+    "name": "awl-weekly-roundup-gh-action",
+    "version": "1.0.0",
+    "description": "Generates a weekly roundup of AWL updates",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "@octokit/graphql": "^7.0.0",
+        "date-fns": "^3.0.0"
+    }
+}
