@@ -32,6 +32,7 @@ jobs:
     - name: Generate Newsletter
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         DATE_OVERRIDE: ${{ inputs.date_override }}
         DRY_RUN: ${{ inputs.dry_run }}
       run: node index.js

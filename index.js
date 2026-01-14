@@ -45,6 +45,7 @@ async function main() {
                 __typename
                 number
                 title
+                body
                 url
                 state
                 createdAt
@@ -204,36 +205,131 @@ async function main() {
         return `- ${icon} [${item.title}](${item.url}) (${linkedStatus} by ${authorLink})`;
     };
 
-    // Conversational Summary
-    const generateSummary = (prsNodes) => {
-        const significantPRs = prsNodes.filter(pr => {
-            const mergedInWeek = pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd;
-            if (!mergedInWeek) return false;
+    // Conversational Summary using Gemini
+    const generateSummary = async (prsNodes) => {
+        if (prsNodes.length === 0) return "This week saw steady progress with various improvements.";
 
-            const t = pr.title.toLowerCase();
-            // Heuristic for interesting PRs
-            return t.includes("feat") || t.includes("add") || t.includes("support") || t.includes("stable") || t.includes("release") || t.includes("update") || t.includes("fix");
-        });
+        const geminiApiKey = process.env.GEMINI_API_KEY;
+        if (!geminiApiKey) {
+            console.warn("GEMINI_API_KEY not found, falling back to heuristic summary.");
+            const significantPRs = prsNodes.filter(pr => {
+                const mergedInWeek = pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd;
+                if (!mergedInWeek) return false;
+                const t = pr.title.toLowerCase();
+                return t.includes("feat") || t.includes("add") || t.includes("support") || t.includes("stable") || t.includes("release") || t.includes("update") || t.includes("fix");
+            });
+            if (significantPRs.length === 0) return "This week saw steady progress with various improvements.";
+            const updates = significantPRs.map(pr => `[${pr.title.replace(/^(feat|fix|chore|docs)(\(.*\))?:/i, '').trim()}](${pr.url})`).slice(0, 3);
+            if (updates.length === 1) return `We are excited to highlight the completion of ${updates[0]}.`;
+            return `Highlights include ${updates.slice(0, -1).join(', ')} and ${updates.slice(-1)}.`;
+        }
 
-        if (significantPRs.length === 0) return "This week saw steady progress with various improvements.";
+        try {
+            const { GoogleGenerativeAI } = require("@google/generative-ai");
+            const genAI = new GoogleGenerativeAI(geminiApiKey);
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-        const updates = significantPRs.map(pr => `[${pr.title.replace(/^(feat|fix|chore|docs)(\(.*\))?:/i, '').trim()}](${pr.url})`).slice(0, 3);
+            const prSummaries = prsNodes
+                .filter(pr => pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd)
+                .map(pr => `- ${pr.title} (Author: ${pr.author ? pr.author.login : 'unknown'})`)
+                .join("\n");
 
-        if (updates.length === 1) return `We are excited to highlight the completion of ${updates[0]}.`;
-        return `Highlights include ${updates.slice(0, -1).join(', ')} and ${updates.slice(-1)}.`;
+            if (!prSummaries) return "This week saw steady progress with various improvements.";
+
+            const prompt = `
+            You are writing a weekly newsletter for the "Agentic Web Learning Tool" project.
+            Here is the list of Pull Requests merged this week:
+            ${prSummaries}
+
+            Please write a short, engaging conversational summary (1-2 sentences) highlighting the key progress.
+            Focus on the value delivered. Do not list every PR. Do not use markdown links in your response, just text.
+            Start with "Highlights include..." or similar.
+            `;
+
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            return response.text().trim();
+        } catch (error) {
+            console.error("Error generating summary with Gemini:", error);
+            return "This week saw steady progress with various improvements.";
+        }
     };
 
     // Build Body
     let body = `Here is the **${reportTitle}**! 🚀\n\n`;
 
+    // Generate Global Summary (using existing function, but modified to just return the text if we want, or keep as is)
+    // Actually, let's keep the global summary at the top, and THEN do the per-PR summaries.
     if (prs.length > 0) {
-        body += `${generateSummary(prs)}\n\n`;
+        body += `${await generateSummary(prs)}\n\n`;
     }
 
     body += `### PR Status\n`;
-    if (prs.length > 0) {
-        body += prs.map(formatBullet).join('\n');
-    } else {
+
+    // Separate Merged PRs for detailed summarization
+    const mergedPRs = prs.filter(pr => pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd);
+    const otherPRs = prs.filter(pr => !(pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd));
+
+    if (mergedPRs.length > 0 && process.env.GEMINI_API_KEY) {
+        try {
+            const { GoogleGenerativeAI } = require("@google/generative-ai");
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+            const prData = mergedPRs.map((pr, index) => `PR #${index}: Title: "${pr.title}", Body: "${(pr.body || '').replace(/\n/g, ' ').substring(0, 200)}..."`).join('\n');
+
+            const prompt = `
+            You are analyzing Pull Requests for a changelog.
+            Here are the merged PRs:
+            ${prData}
+
+            For each PR, write a 1-sentence summary of the functionality merged.
+            Return valid JSON format: { "summaries": [ { "index": 0, "summary": "..." }, ... ] }
+            Do not include markdown formatting in the JSON.
+            `;
+
+            const result = await model.generateContent(prompt);
+            const responseText = result.response.text();
+
+            // Clean/Parse JSON
+            const jsonStart = responseText.indexOf('{');
+            const jsonEnd = responseText.lastIndexOf('}');
+            const jsonString = responseText.substring(jsonStart, jsonEnd + 1);
+            const summaries = JSON.parse(jsonString).summaries;
+
+            // Map summaries back to PRs
+            mergedPRs.forEach((pr, i) => {
+                const summaryObj = summaries.find(s => s.index === i);
+                pr.aiSummary = summaryObj ? summaryObj.summary : "No summary available.";
+            });
+
+        } catch (error) {
+            console.error("Error generating PR summaries:", error);
+        }
+    }
+
+    // Render Merged PRs with Collapsible Sections
+    if (mergedPRs.length > 0) {
+        body += mergedPRs.map(pr => {
+            const statusText = `Merged on ${formatDate(pr.mergedAt)}`;
+            const authorLink = pr.author ? `[@${pr.author.login}](${pr.author.url})` : "unknown";
+            const summary = pr.aiSummary || (pr.body ? pr.body.substring(0, 100) + "..." : "No description provided.");
+
+            return `<details>
+<summary>✅ <strong>${pr.title}</strong> (${statusText} by ${authorLink})</summary>
+<br>
+${summary}
+<br><br>
+<a href="${pr.url}">View Pull Request</a>
+</details>`;
+        }).join('\n\n');
+        body += '\n\n';
+    }
+
+    // Render Other PRs (Open/Closed but not merged) normally
+    if (otherPRs.length > 0) {
+        body += otherPRs.map(formatBullet).join('\n');
+    } else if (mergedPRs.length === 0) {
         body += `*No new activity this week*`;
     }
     body += `\n\n`;

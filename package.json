@@ -7,6 +7,7 @@
         "start": "node index.js"
     },
     "dependencies": {
+        "@google/generative-ai": "^0.24.1",
         "@octokit/graphql": "^7.0.0",
         "date-fns": "^3.0.0"
     }
