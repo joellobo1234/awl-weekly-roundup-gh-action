@@ -13,6 +13,10 @@ on:
         description: 'Dry Run (true/false)'
         required: false
         default: 'false'
+      source_repo:
+        description: 'Source Repo to scrape (owner/name)'
+        required: false
+        default: 'amedina/agentic-web-learning-tool'
 
 permissions:
   discussions: write
@@ -39,4 +43,5 @@ jobs:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         DATE_OVERRIDE: ${{ inputs.date_override }}
         DRY_RUN: ${{ inputs.dry_run }}
+        SOURCE_REPO: ${{ inputs.source_repo }}
       run: node index.js
