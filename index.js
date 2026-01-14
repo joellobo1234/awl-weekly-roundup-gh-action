@@ -343,7 +343,7 @@ async function main() {
             }
 
             const formattedDateStr = formatDate(date);
-            const authorLink = pr.author ? `[@${pr.author.login}](${pr.author.url})` : "unknown";
+            const authorLink = pr.author ? `<a href="${pr.author.url}">@${pr.author.login}</a>` : "unknown";
             const summary = pr.aiSummary || (pr.body ? pr.body.substring(0, 100) + "..." : "No description provided.");
 
             return `<details>
