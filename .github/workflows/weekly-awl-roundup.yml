@@ -43,5 +43,5 @@ jobs:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         DATE_OVERRIDE: ${{ inputs.date_override }}
         DRY_RUN: ${{ inputs.dry_run }}
-        SOURCE_REPO: ${{ inputs.source_repo }}
+        SOURCE_REPO: ${{ inputs.source_repo || 'amedina/agentic-web-learning-tool' }}
       run: node index.js
