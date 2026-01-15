@@ -8,10 +8,10 @@ A professional GitHub Action that automates the creation of "Week in AWL" status
 
 ## 🚀 Features
 
-*   **Automated Weekly Reporting**: Scheduled to run every **Saturday at 00:00 UTC** to capture the previous week's progress.
+*   **Automated Weekly Reporting**: Scheduled to run every **Wednesday at 17:00 IST (11:30 UTC)** to capture the previous week's progress.
 *   **AI-Powered Summaries**: Uses **Google Gemini 2.0 Flash** to write:
     *   A high-level conversational overview of the week's achievements.
-    *   Detailed, context-aware summaries for each merged Pull Request.
+    *   Detailed, context-aware summaries that **summarise relevant information** for each merged Pull Request.
 *   **Smart Categorization**: Sorts updates by type (`Feature` > `Feat` > `Fix` > `Chore`) and status (`Merged` > `Created` > `Closed`).
 *   **Accordion-Style UI**: Presents data in clean, collapsible sections for better readability.
 *   **Contributor Recognition**: Automatically highlights active contributors from the community.
