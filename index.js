@@ -14,14 +14,15 @@ async function main() {
     });
 
     // Calculate dates
-    // Logic: Run on Saturday, Report covers [Previous Saturday] to [Yesterday Friday]
+    // Logic: Runs on Wednesday 5PM. Report covers last 7 days.
     const now = process.env.DATE_OVERRIDE ? new Date(process.env.DATE_OVERRIDE) : new Date();
 
-    const endDate = endOfDay(subDays(now, 1));    // Yesterday (Friday)
-    const startDate = startOfDay(subDays(now, 7)); // 7 Days ago (Last Saturday)
+    const endDate = now;
+    const startDate = subDays(now, 7);
 
-    const formattedStart = format(startDate, "yyyy-MM-dd");
-    const formattedEnd = format(endDate, "yyyy-MM-dd");
+    // Use full ISO strings for precise filtering
+    const formattedStart = startDate.toISOString();
+    const formattedEnd = endDate.toISOString();
 
     // Title format: "Week in AWL | start date - end date"
     const titleDateRange = `${format(startDate, "d MMMM yyyy")} - ${format(endDate, "d MMMM yyyy")}`;
@@ -32,6 +33,7 @@ async function main() {
     // Prioritize SOURCE_REPO (env), then GITHUB_REPOSITORY (current action repo), then fallback.
     const targetRepoName = process.env.SOURCE_REPO || process.env.GITHUB_REPOSITORY || "amedina/agentic-web-learning-tool";
     console.log(`Targeting Repository: ${targetRepoName}`);
+    const [sourceOwner, sourceRepo] = targetRepoName.split("/");
 
     const repoQuery = `repo:${targetRepoName}`;
 
@@ -243,21 +245,19 @@ ${summary}
 </details>`;
     };
 
-    // Conversational Summary using Gemini (Global)
-    const generateSummary = async (prsNodes) => {
+    // Conversational Summary using Gemini (Global) - Now uses Enriched Data
+    const generateGlobalSummary = async (enrichedPRs) => {
         const geminiApiKey = process.env.GEMINI_API_KEY;
 
-        if (prsNodes.length === 0) {
-            // If we have issues but no PRs, we can mention that.
-            // OR just standard text.
+        const mergedPRs = enrichedPRs.filter(pr => pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd);
+
+        if (mergedPRs.length === 0) {
             return "This week saw steady progress with various improvements.";
         }
 
         if (!geminiApiKey) {
             console.warn("GEMINI_API_KEY not found, falling back to heuristic summary.");
-            const significantPRs = prsNodes.filter(pr => {
-                const mergedInWeek = pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd;
-                if (!mergedInWeek) return false;
+            const significantPRs = mergedPRs.filter(pr => {
                 const t = pr.title.toLowerCase();
                 return t.includes("feat") || t.includes("add") || t.includes("support") || t.includes("stable") || t.includes("release") || t.includes("update") || t.includes("fix");
             });
@@ -272,28 +272,26 @@ ${summary}
             const genAI = new GoogleGenerativeAI(geminiApiKey);
             const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-            const prSummaries = prsNodes
-                .filter(pr => pr.mergedAt && pr.mergedAt >= formattedStart && pr.mergedAt <= formattedEnd)
-                .map(pr => `- ${pr.title} (Author: ${pr.author ? pr.author.login : 'unknown'})`)
+            // Use the AI Summaries if available, otherwise fallback to title/body
+            const prSummaries = mergedPRs
+                .map(pr => `- ${pr.title}: ${pr.aiSummary || pr.body}`)
                 .join("\n");
-
-            if (!prSummaries) return "This week saw steady progress with various improvements.";
 
             const prompt = `
             You are writing a weekly newsletter for the "Agentic Web Learning Tool" project.
-            Here is the list of Pull Requests merged this week:
+            Here is the summary of the work completed (Merged PRs) this week:
             ${prSummaries}
 
             Please write a short, engaging conversational summary (1-2 sentences) highlighting the key progress.
-            Focus on the value delivered. Do not list every PR. Do not use markdown links in your response, just text.
-            Start with "Highlights include..." or similar.
+            Focus on the actual value delivered based on the summaries provided.
+            Start with "Highlights include..." or similar. Do not use markdown links.
             `;
 
             const result = await model.generateContent(prompt);
             const response = await result.response;
             return response.text().trim();
         } catch (error) {
-            console.error("Error generating summary with Gemini:", error);
+            console.error("Error generating global summary with Gemini:", error);
             return "This week saw steady progress with various improvements.";
         }
     };
@@ -302,7 +300,8 @@ ${summary}
     let body = `Here is the **${reportTitle}**! 🚀\n\n`;
 
     // Always generate summary
-    body += `${await generateSummary(prs)}\n\n`;
+    // Wait to generate global summary until AFTER enrichment
+    // body += `${await generateSummary(prs)}\n\n`; // MOVED DOWN
 
     body += `### PR Status\n`;
 
@@ -320,20 +319,73 @@ ${summary}
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
             const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
+            // Helper to fetch diffs using REST API (More reliable for patches)
+            const getPRDiffs = async (prNumber) => {
+                try {
+                    // Use standard fetch for REST API to get patches reliably
+                    const response = await fetch(`https://api.github.com/repos/${sourceOwner}/${sourceRepo}/pulls/${prNumber}/files?per_page=10`, {
+                        headers: {
+                            'Authorization': `token ${process.env.GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        console.warn(`Failed to fetch diffs for PR #${prNumber}: ${response.status} ${response.statusText}`);
+                        return [];
+                    }
+
+                    const files = await response.json();
+                    return files.map(f => ({
+                        path: f.filename,
+                        patch: f.patch
+                    }));
+                } catch (e) {
+                    console.warn(`Failed to fetch diffs for PR #${prNumber}`, e.message);
+                    return [];
+                }
+            };
+
+            const IGNORED_FILES = ['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', 'dist/', '.min.js', '.map', 'npm-debug.log'];
+
+            // Enrich PRs with Diffs
+            console.log("Fetching code diffs (via REST) for improved AI summaries...");
+            await Promise.all(relevantPRs.map(async (pr) => {
+                const files = await getPRDiffs(pr.number);
+                const usefulFiles = files.filter(f => !IGNORED_FILES.some(ignored => f.path.includes(ignored)));
+
+                // create a concise diff string
+                pr.diffContext = usefulFiles.map(f => {
+                    // heavily caption the patch to avoid token limits, just getting the gist
+                    const snippet = (f.patch || '').split('\n').slice(0, 30).join('\n');
+                    return `File: ${f.path}\nDiff Preview:\n${snippet}...`;
+                }).join('\n\n');
+            }));
+
             // Batch process matched PRs
-            const prData = relevantPRs.map((pr, index) => `PR #${index}: Title: "${pr.title}", State: ${pr.state}, Body: "${(pr.body || '').replace(/\n/g, ' ').substring(0, 300)}..."`).join('\n');
+            const prData = relevantPRs.map((pr, index) => {
+                return `
+PR #${index}
+Title: "${pr.title}"
+State: ${pr.state}
+Developer Description: "${(pr.body || '').replace(/\n/g, ' ').substring(0, 300)}..."
+Code Context (Diffs):
+${pr.diffContext || "No diff available."}
+--------------------------------------------------
+`;
+            }).join('\n');
 
             const prompt = `
-            You are analyzing Pull Requests for a technical newsletter.
-            Here is the list of PRs:
-            ${prData}
+            You are a Senior Technical Editor writing a weekly engineering newsletter.
+            I will provide a list of Pull Requests. For each PR, I have included the "Developer Description" AND the "Code Context" (files changed).
 
-            For each PR, write a clear, elaborate summary (2-3 sentences).
-            - For MERGED PRs: Explain exactly what functionality was added or fixed and why it matters to the team.
-            - For OPEN/WIP PRs: Explain what this feature *will* add or solve when completed.
+            YOUR GOAL: Write a "Blended Summary" (2-3 sentences) for each PR.
+            1. **Truth Seeking**: If the Developer Description is vague (e.g., "fixed bug"), look at the Code Context to describe *what* actually changed (e.g., "Fixed null pointer in auth logic").
+            2. **Synthesis**: Combine the intent (Description) with the reality (Code).
+            3. **Format**: Return valid JSON: { "summaries": [ { "index": 0, "summary": "..." }, ... ] }
             
-            Return valid JSON format: { "summaries": [ { "index": 0, "summary": "..." }, ... ] }
-            Do not include markdown formatting in the JSON.
+            Input PRs:
+            ${prData}
             `;
 
             const result = await model.generateContent(prompt);
@@ -399,6 +451,11 @@ ${summary}
     }
 
     body += `\n---\n*Auto-generated by Week in AWL GitHub Action, summarised using Gemini 2.0 Flash. The summaries in this post are generated by AI and may contain inaccuracies. Please verify important details by reviewing the source Pull Requests/Issues directly.*`;
+
+    const globalSummary = await generateGlobalSummary(relevantPRs);
+
+    // Inject summary at the top
+    body = `Here is the **${reportTitle}**! 🚀\n\n${globalSummary}\n\n` + body.substring(body.indexOf("### PR Status"));
 
     if (process.env.DRY_RUN === 'true') {
         console.log("---------------------------------------------------");
